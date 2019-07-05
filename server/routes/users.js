@@ -85,10 +85,7 @@ router.post('/register', (req, res) => {
 
 // Login
 router.post('/login', (req, res, next) => {
-  //var count_user = db.users.find({session:});
-  var x = db.sessions.find({"session":true})
-  console.log(x);
-  console.log(typeof(x));
+  //console.log(req.sessionID)
   passport.authenticate('local', {
     successRedirect: '/dashboard',
     failureRedirect: '/users/login',

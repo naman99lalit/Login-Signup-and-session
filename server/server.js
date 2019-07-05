@@ -7,6 +7,7 @@ const session = require('express-session');
 const passport = require('passport');
 const router = express.Router();
 var MongoStore = require('connect-mongo')(session);
+const User = require('./models/User');
 
 const app = express();
 
@@ -43,15 +44,24 @@ app.use(
   })
 );
 
-// app.use((req,res,next)=>{
-//   console.log(req.session);
-//   console.log(typeof(req.session));
-//   next();
-// });
 
 // Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
+
+//Checking the user limit
+app.use((req,res,next)=>{
+  console.log(req.session);
+  console.log(req.session.passport);
+  if(req.session.passport){
+    //console.log(req.session.passport.user);
+    var user_id = req.session.passport.user;
+    var id = mongoose.Types.ObjectId(user_id);
+    console.log(db.users.find({
+     "_id" : id }).count())
+  }
+  next();
+});
 
 // Connect flash
 app.use(flash());
