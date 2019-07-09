@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
+const mongoose = require('mongoose');
 // Load User model
 const User = require('../models/User');
 const { forwardAuthenticated } = require('../config/auth');
@@ -84,14 +85,45 @@ router.post('/register', (req, res) => {
 
 
 // Login
-router.post('/login', (req, res, next) => {
-  //console.log(req.sessionID)
-  passport.authenticate('local', {
-    successRedirect: '/dashboard',
-    failureRedirect: '/users/login',
-    failureFlash: true
-  })(req, res, next)
-});
+
+router.post('/login',
+  passport.authenticate('local'),
+  function(req,res){
+    if(req.session){
+      console.log(req.session)
+      var user_id = req.session.passport.user;
+      var _id = mongoose.Types.ObjectId(user_id);
+      User.find({ _id : _id }).then(user=>{
+        if(user){
+          console.log(user)
+        }
+      })
+      query_str = '"user":"' + user_id + '"'
+      //console.log(db)
+      //console.log(db.listCollections())
+      res.redirect('/dashboard')
+    }
+    else{
+      res.redirect('/users/login')
+    }
+  });
+// router.post('/login', (req, res, next) => {
+
+//   // passport.authenticate('local', {
+//   //   successRedirect: '/dashboard',
+//   //   failureRedirect: '/users/login',
+//   //   failureFlash: true
+//   // })
+//   console.log(req.session);
+//   console.log(req.session.passport);
+//   if(req.session.passport){
+//     //console.log(req.session.passport.user);
+//     var user_id = req.session.passport.user;
+//     var id = mongoose.Types.ObjectId(user_id);
+//     console.log(id)
+//     User.find({"_id":id}).count()
+//   }(req, res, next)
+// });
 
 // Logout
 router.get('/logout', (req, res) => {
